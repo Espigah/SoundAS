@@ -358,15 +358,41 @@ package treefortress.sound
 		
 		protected function onSoundLoadComplete(event:Event):void {
 			var sound:Sound = event.target as Sound;
-			loadCompleted.dispatch(instancesBySound[sound]);	
+			sound.removeEventListener(IOErrorEvent.IO_ERROR, onSoundLoadError);
+			sound.removeEventListener(Event.COMPLETE, onSoundLoadComplete);
+			loadCompleted.dispatch(instancesBySound[sound]);
 		}
 		
 		protected function onSoundLoadProgress(event:ProgressEvent):void { }
 		
 		protected function onSoundLoadError(event:IOErrorEvent):void {
-			var sound:SoundInstance = instancesBySound[event.target as Sound];
-			loadFailed.dispatch(sound);
-			trace("[SoundAS] ERROR: Failed Loading Sound '"+sound.type+"' @ "+sound.url);
+			var sound:Sound = event.target as Sound;
+			sound.removeEventListener(IOErrorEvent.IO_ERROR, onSoundLoadError);
+			sound.removeEventListener(Event.COMPLETE, onSoundLoadComplete);
+			
+			//[Fault] exception, information=ArgumentError: Error #2068: 声音无效。
+			//不清除, 可能导致Error #2068:错误
+			var soundInstance:SoundInstance = instancesBySound[sound];
+			//soundInstance.group = null;
+			delete instancesBySound[soundInstance.sound];
+			
+			var index:int = instances.indexOf(soundInstance);
+			if (index != -1) {
+				instances.splice(index, 1);
+			}
+			if (checkIsSingleTypeSound(soundInstance)) {
+				delete instancesByType[soundInstance.type]
+			}
+			loadFailed.dispatch(soundInstance);
+			trace("[SoundAS] ERROR: Failed Loading Sound '"+soundInstance.type+"' @ "+soundInstance.url);
+		}
+		
+		protected function checkIsSingleTypeSound(si:SoundInstance):Boolean {
+			if (!(si || instancesByType[si.type])) {
+				return false;
+			}
+			var soundInstance:SoundInstance = instancesByType[si.type];
+			return soundInstance == si;
 		}
 		
 		protected function get tickEnabled():Boolean { return _tickEnabled; }
