@@ -340,9 +340,9 @@ package treefortress.sound
 			groupsByName = {};
 			activeTweens = new Vector.<SoundTween>();
 		}
-		
+
 		internal function addMasterTween(startVolume:Number, endVolume:Number, duration:Number, stopAtZero:Boolean):void {
-			if(!_masterTween){ _masterTween = new SoundTween(null, 0, 0, true); }
+			if(!_masterTween){ _masterTween = new SoundTween(null, 0, 0, true, this == SoundAS ? null : this); }
 			_masterTween.init(startVolume, endVolume, duration);
 			_masterTween.stopAtZero = stopAtZero;
 			_masterTween.update(0);
