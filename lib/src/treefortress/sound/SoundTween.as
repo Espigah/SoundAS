@@ -12,13 +12,15 @@ package treefortress.sound
 		
 		protected var isMasterFade:Boolean;
 		protected var _isComplete:Boolean;
+		protected var _soundGroup:SoundManager;
 		
-		public function SoundTween(si:SoundInstance, endVolume:Number, duration:Number, isMasterFade:Boolean = false) {
+		public function SoundTween(si:SoundInstance, endVolume:Number, duration:Number, isMasterFade:Boolean = false, group:SoundManager = null) {
 			if(si){
 				sound = si;
 				startVolume = sound.volume;
 			}
 			this.isMasterFade = isMasterFade;
+			this._soundGroup = group;
 			init(startVolume, endVolume, duration);
 		}
 		
@@ -26,13 +28,27 @@ package treefortress.sound
 			if(_isComplete){ return _isComplete; }
 			
 			if(isMasterFade){
-				if(t - startTime < duration){
-					SoundAS.masterVolume = easeOutQuad(t - startTime, startVolume, endVolume - startVolume, duration);
+				if (t - startTime < duration) {
+					if (this._soundGroup) {
+						this._soundGroup.masterVolume = easeOutQuad(t - startTime, startVolume, endVolume - startVolume, duration);
+					}
+					else {
+						SoundAS.masterVolume = easeOutQuad(t - startTime, startVolume, endVolume - startVolume, duration);
+					}
 				} else {
-					SoundAS.masterVolume = endVolume;
+					if (this._soundGroup) {
+						this._soundGroup.masterVolume = endVolume;
+					}
+					else {
+						SoundAS.masterVolume = endVolume;
+					}
 				}
-				_isComplete = SoundAS.masterVolume == endVolume;
-				
+				if (this._soundGroup) {
+					_isComplete = this._soundGroup.masterVolume == endVolume;
+				}
+				else {
+					_isComplete = SoundAS.masterVolume == endVolume;
+				}
 			} else {
 				if(t - startTime < duration){
 					sound.volume = easeOutQuad(t - startTime, startVolume, endVolume - startVolume, duration);

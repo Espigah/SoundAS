@@ -314,7 +314,7 @@ package treefortress.sound
 		}
 		
 		internal function addMasterTween(startVolume:Number, endVolume:Number, duration:Number = 1000):void {
-			if(!_masterTween){ _masterTween = new SoundTween(null, 0, 0, true); }
+			if(!_masterTween){ _masterTween = new SoundTween(null, 0, 0, true, this == SoundAS ? null : this); }
 			_masterTween.init(startVolume, endVolume, duration);
 			_masterTween.update(0);
 			//Only add masterTween if it isn't already active.
