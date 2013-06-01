@@ -2,22 +2,29 @@ package treefortress.sound
 {
 	import flash.utils.getTimer;
 	
+	import org.osflash.signals.Signal;
+	
 	public class SoundTween {
 		
 		public var startTime:int;
 		public var startVolume:Number;
 		public var endVolume:Number;
 		public var duration:Number;
-		public var sound:SoundInstance;
-		
+
 		protected var isMasterFade:Boolean;
+		protected var _sound:SoundInstance;
 		protected var _isComplete:Boolean;
+
+		public var ended:Signal;
+		public var stopAtZero:Boolean;
 		
 		public function SoundTween(si:SoundInstance, endVolume:Number, duration:Number, isMasterFade:Boolean = false) {
 			if(si){
 				sound = si;
 				startVolume = sound.volume;
 			}
+			
+			ended = new Signal(SoundInstance);
 			this.isMasterFade = isMasterFade;
 			init(startVolume, endVolume, duration);
 		}
@@ -53,11 +60,27 @@ package treefortress.sound
 			_isComplete = false;
 		}
 		
+		/** 
+		 * End the fade and dispatch ended signal. Optionally, apply the end volume as well. 
+		 * **/
 		public function end(applyEndVolume:Boolean = false):void {
 			_isComplete = true;
-			if(applyEndVolume){
-				sound.volume = endVolume;
+			if(!isMasterFade){
+				if(applyEndVolume){
+					sound.volume = endVolume;
+				}
+				if(stopAtZero && sound.volume == 0){
+					sound.stop();
+				}
 			}
+			ended.dispatch(this.sound);
+			ended.removeAll();
+		}
+		
+		/** End the fade silently, will not send 'ended' signal **/
+		public function kill():void {
+			_isComplete = true;
+			ended.removeAll();
 		}
 		
 		/**
@@ -79,7 +102,16 @@ package treefortress.sound
 			return _isComplete;
 		}
 
+		public function get sound():SoundInstance { return _sound; }
+		public function set sound(value:SoundInstance):void {
+			_sound = value;
+			if(!sound){
+				trace("SOUND IS NULLLLL");
+			}
+		}
 
+
+		
 		
 	}
 }

@@ -13,7 +13,7 @@ package treefortress.sound
 	public class SoundInstance {
 		
 		
-		public var group:SoundManager;
+		public var manager:SoundManager;
 		
 		/**
 		 * Registered type for this Sound
@@ -65,14 +65,15 @@ package treefortress.sound
 		protected var soundTransform:SoundTransform;
 		internal var currentTween:SoundTween;
 		
+		
+		
 		public function SoundInstance(sound:Sound = null, type:String = null){
 			this.sound = sound;
 			this.type = type;
-			group = SoundAS;
-			
+			manager = SoundAS;
 			pauseTime = 0;
 			_volume = 1;			
-			_masterVolume = 1;
+			_masterVolume = 1
 			soundCompleted = new Signal(SoundInstance);
 			soundTransform = new SoundTransform();
 			oldChannels = new <SoundChannel>[];
@@ -130,6 +131,10 @@ package treefortress.sound
 			return this;
 		}
 		
+		public function get fade():SoundTween {
+			return currentTween;
+		}
+		
 		/**
 		 * Pause currently playing sound. Use resume() to continue playback. Pause / resume is supported for single sounds only.
 		 */
@@ -156,9 +161,8 @@ package treefortress.sound
 		 */
 		public function stop():SoundInstance {
 			pauseTime = 0;
-			stopOldChannels();
 			stopChannel(channel);
-			channel = null;
+			stopOldChannels();
 			return this;
 		}
 		
@@ -177,16 +181,16 @@ package treefortress.sound
 		/**
 		 * Fade using the current volume as the Start Volume
 		 */
-		public function fadeTo(endVolume:Number, duration:Number = 1000):SoundInstance {
-			currentTween = group.addTween(type, -1, endVolume, duration);
+		public function fadeTo(endVolume:Number, duration:Number = 1000, stopAtZero:Boolean = true):SoundInstance {
+			currentTween = manager.addTween(type, -1, endVolume, duration, stopAtZero);
 			return this;
 		}
 		
 		/**
 		 * Fade and specify both the Start Volume and End Volume.
 		 */
-		public function fadeFrom(startVolume:Number, endVolume:Number, duration:Number = 1000):SoundInstance {
-			currentTween = group.addTween(type, startVolume, endVolume, duration);
+		public function fadeFrom(startVolume:Number, endVolume:Number, duration:Number = 1000, stopAtZero:Boolean = true):SoundInstance {
+			currentTween = manager.addTween(type, startVolume, endVolume, duration, stopAtZero);
 			return this;
 		}
 		
@@ -273,14 +277,14 @@ package treefortress.sound
 			sound = null;
 			soundTransform = null;
 			stopChannel(channel);
-			channel = null;
-			endFade();
+			fade.end(false);
 		}
 		
 		/**
 		 * Dispatched when Sound has finished playback
 		 */
 		protected function onSoundComplete(event:Event):void {
+			//trace("stop", ++stopCount);
 			var channel:SoundChannel = event.target as SoundChannel;
 			channel.removeEventListener(Event.SOUND_COMPLETE, onSoundComplete);
 			
@@ -297,10 +301,12 @@ package treefortress.sound
 					//Loop set number of times?
 					else if(_loopsRemaining--){
 						play(_volume, 0, _loopsRemaining, allowMultiple);
+					} else {
+						soundCompleted.dispatch(this);
 					}
+				} else {
+					soundCompleted.dispatch(this);
 				}
-				soundCompleted.dispatch(this);
-				
 			}
 			//Clear out any old channels...
 			for(var i:int = oldChannels.length; i--;){
@@ -309,16 +315,6 @@ package treefortress.sound
 					oldChannels.splice(i, 1);
 				}
 			}
-		}
-		
-		/**
-		 * Ends the current tween for this sound if it has one.
-		 */
-		public function endFade(applyEndVolume:Boolean = false):SoundInstance {
-			if(!currentTween){ return this; }
-			currentTween.end(applyEndVolume);
-			currentTween = null;
-			return this;
 		}
 		
 		/**
@@ -362,6 +358,7 @@ package treefortress.sound
 
 	
 
+		
 	}
 }
 
