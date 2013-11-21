@@ -11,8 +11,7 @@ package treefortress.sound
 	import flash.utils.Dictionary;
 	import flash.utils.getTimer;
 	
-	import org.osflash.signals.Signal;
-	
+	import org.osflash.signals.Signal; //todo - remover - for reflection (useSignal = true)
 	
 	/**
 	 * Controls playback and loading of a group of sounds. SoundAS references a global instance of SoundManager, but you are free to instanciate your own and use them in a modular fashion.
@@ -35,23 +34,24 @@ package treefortress.sound
 		protected var _masterVolume:Number;
 		protected var _masterTween:SoundTween;
 		
-		public function SoundManager(){
+		public function SoundManager()
+		{
 			init();
 		}
 		
 		/**
-		 * Dispatched when an external Sound has completed loading. 
+		 * Dispatched when an external Sound has completed loading.
 		 */
 		public var loadCompleted:Signal;
 		
 		/**
-		 * Dispatched when an external Sound has failed loading. 
+		 * Dispatched when an external Sound has failed loading.
 		 */
 		public var loadFailed:Signal;
 		public var parent:SoundManager;
 		
 		/**
-		 * Play audio by type. It must already be loaded into memory using the addSound() or loadSound() APIs. 
+		 * Play audio by type. It must already be loaded into memory using the addSound() or loadSound() APIs.
 		 * @param type
 		 * @param volume
 		 * @param startTime Starting time in milliseconds
@@ -60,18 +60,23 @@ package treefortress.sound
 		 * @param allowInterrupt If this sound is currently playing, interrupt it and start at the specified StartTime. Otherwise, just update the Volume.
 		 * @param enableSeamlessLoops If this sound is currently playing, interrupt it and start at the specified StartTime. Otherwise, just update the Volume.
 		 */
-		public function play(type:String, volume:Number = 1, startTime:Number = 0, loops:int = 0, allowMultiple:Boolean = false, allowInterrupt:Boolean = true, enableSeamlessLoops:Boolean = false):SoundInstance {
+		public function play(type:String, volume:Number = 1, startTime:Number = 0, loops:int = 0, allowMultiple:Boolean = false, allowInterrupt:Boolean = true, enableSeamlessLoops:Boolean = false):SoundInstance
+		{
 			var si:SoundInstance = getSound(type);
 			
 			//If we retrieved this instance from another manager, add it to our internal list of active instances.
-			if(instances.indexOf(si) == -1){  }
+			if (instances.indexOf(si) == -1)
+			{
+			}
 			
 			//Sound is playing, and we're not allowed to interrupt it. Just set volume.
-			if(!allowInterrupt && si.isPlaying){
+			if (!allowInterrupt && si.isPlaying)
+			{
 				si.volume = volume;
-			} 
-				//Play sound
-			else {
+			}
+			//Play sound
+			else
+			{
 				si.play(volume, startTime, loops, allowMultiple, enableSeamlessLoops);
 			}
 			return si;
@@ -80,112 +85,136 @@ package treefortress.sound
 		/**
 		 * Convenience function to play a sound that should loop forever.
 		 */
-		public function playLoop(type:String, volume:Number = 1, startTime:Number = 0, enableSeamlessLoops:Boolean = true):SoundInstance {
+		public function playLoop(type:String, volume:Number = 1, startTime:Number = 0, enableSeamlessLoops:Boolean = true):SoundInstance
+		{
 			return play(type, volume, startTime, -1, false, true, enableSeamlessLoops);
 		}
 		
 		/**
 		 * Convenience function to play a sound that can have overlapping instances (ie click or soundFx).
 		 */
-		public function playFx(type:String, volume:Number = 1, startTime:Number = 0, loops:int = 0):SoundInstance {
+		public function playFx(type:String, volume:Number = 1, startTime:Number = 0, loops:int = 0):SoundInstance
+		{
 			return play(type, volume, startTime, 0, true);
 		}
 		
 		/**
 		 * Stop all sounds immediately.
 		 */
-		public function stopAll():void {
-			for(var i:int = instances.length; i--;){
+		public function stopAll():void
+		{
+			for (var i:int = instances.length; i--; )
+			{
 				instances[i].stop();
 			}
 		}
 		
 		/**
-		 * Resume specific sound 
+		 * Resume specific sound
 		 */
-		public function resume(type:String):SoundInstance {
+		public function resume(type:String):SoundInstance
+		{
 			return getSound(type).resume();
 		}
 		
 		/**
 		 * Resume all paused instances.
 		 */
-		public function resumeAll():void {
-			for(var i:int = instances.length; i--;){
+		public function resumeAll():void
+		{
+			for (var i:int = instances.length; i--; )
+			{
 				instances[i].resume();
 			}
 		}
 		
-		/** 
-		 * Pause a specific sound 
+		/**
+		 * Pause a specific sound
 		 **/
-		public function pause(type:String):SoundInstance {
+		public function pause(type:String):SoundInstance
+		{
 			return getSound(type).pause();
 		}
 		
 		/**
 		 * Pause all sounds
 		 */
-		public function pauseAll():void {
-			for(var i:int = instances.length; i--;){
+		public function pauseAll():void
+		{
+			for (var i:int = instances.length; i--; )
+			{
 				instances[i].pause();
 			}
 		}
 		
-		/** 
+		/**
 		 * Fade specific sound starting at the current volume
 		 **/
-		public function fadeTo(type:String, endVolume:Number = 1, duration:Number = 1000, stopAtZero:Boolean = true):SoundInstance {
+		public function fadeTo(type:String, endVolume:Number = 1, duration:Number = 1000, stopAtZero:Boolean = true):SoundInstance
+		{
 			return getSound(type).fadeTo(endVolume, duration, stopAtZero);
 		}
 		
 		/**
 		 * Fade all sounds starting from their current Volume
 		 */
-		public function fadeAllTo(endVolume:Number = 1, duration:Number = 1000, stopAtZero:Boolean = true):void {
-			for(var i:int = instances.length; i--;){
+		public function fadeAllTo(endVolume:Number = 1, duration:Number = 1000, stopAtZero:Boolean = true):void
+		{
+			for (var i:int = instances.length; i--; )
+			{
 				instances[i].fadeTo(endVolume, duration, stopAtZero);
 			}
 		}
 		
-		/** 
+		/**
 		 * Fade master volume starting at the current value
 		 **/
-		public function fadeMasterTo(endVolume:Number = 1, duration:Number = 1000, stopAtZero:Boolean = true):void {
+		public function fadeMasterTo(endVolume:Number = 1, duration:Number = 1000, stopAtZero:Boolean = true):void
+		{
 			addMasterTween(_masterVolume, endVolume, duration, stopAtZero);
-			
+		
 		}
 		
-		/** 
+		/**
 		 * Fade specific sound specifying both the StartVolume and EndVolume.
 		 **/
-		public function fadeFrom(type:String, startVolume:Number = 0, endVolume:Number = 1, duration:Number = 1000, stopAtZero:Boolean = true):SoundInstance {
+		public function fadeFrom(type:String, startVolume:Number = 0, endVolume:Number = 1, duration:Number = 1000, stopAtZero:Boolean = true):SoundInstance
+		{
 			return getSound(type).fadeFrom(startVolume, endVolume, duration, stopAtZero);
 		}
 		
 		/**
 		 * Fade all sounds specifying both the StartVolume and EndVolume.
 		 */
-		public function fadeAllFrom(startVolume:Number = 0, endVolume:Number = 1, duration:Number = 1000, stopAtZero:Boolean = true):void {
-			for(var i:int = instances.length; i--;){
+		public function fadeAllFrom(startVolume:Number = 0, endVolume:Number = 1, duration:Number = 1000, stopAtZero:Boolean = true):void
+		{
+			for (var i:int = instances.length; i--; )
+			{
 				instances[i].fadeFrom(startVolume, endVolume, duration, stopAtZero);
 			}
 		}
 		
-		/** 
+		/**
 		 * Fade master volume specifying both the StartVolume and EndVolume.
 		 **/
-		public function fadeMasterFrom(startVolume:Number = 0, endVolume:Number = 1, duration:Number = 1000, stopAtZero:Boolean = true):void {
+		public function fadeMasterFrom(startVolume:Number = 0, endVolume:Number = 1, duration:Number = 1000, stopAtZero:Boolean = true):void
+		{
 			addMasterTween(startVolume, endVolume, duration, stopAtZero);
 		}
 		
 		/**
 		 * Mute all instances.
 		 */
-		public function get mute():Boolean { return _mute; }
-		public function set mute(value:Boolean):void {
+		public function get mute():Boolean
+		{
+			return _mute;
+		}
+		
+		public function set mute(value:Boolean):void
+		{
 			_mute = value;
-			for(var i:int = instances.length; i--;){
+			for (var i:int = instances.length; i--; )
+			{
 				instances[i].mute = _mute;
 			}
 		}
@@ -193,10 +222,16 @@ package treefortress.sound
 		/**
 		 * Set volume on all instances
 		 */
-		public function get volume():Number { return _volume; }
-		public function set volume(value:Number):void {
+		public function get volume():Number
+		{
+			return _volume;
+		}
+		
+		public function set volume(value:Number):void
+		{
 			_volume = value;
-			for(var i:int = instances.length; i--;){
+			for (var i:int = instances.length; i--; )
+			{
 				instances[i].volume = _volume;
 			}
 		}
@@ -204,19 +239,27 @@ package treefortress.sound
 		/**
 		 * Set pan on all instances
 		 */
-		public function get pan():Number { return _pan; }
-		public function set pan(value:Number):void {
+		public function get pan():Number
+		{
+			return _pan;
+		}
+		
+		public function set pan(value:Number):void
+		{
 			_pan = value;
-			for(var i:int = instances.length; i--;){
+			for (var i:int = instances.length; i--; )
+			{
 				instances[i].pan = _pan;
 			}
 		}
 		
 		/**
-		 * Set soundTransform on all instances. 
+		 * Set soundTransform on all instances.
 		 */
-		public function set soundTransform(value:SoundTransform):void {
-			for(var i:int = instances.length; i--;){
+		public function set soundTransform(value:SoundTransform):void
+		{
+			for (var i:int = instances.length; i--; )
+			{
 				instances[i].soundTransform = value;
 			}
 		}
@@ -224,45 +267,65 @@ package treefortress.sound
 		/**
 		 * Returns a SoundInstance for a specific type.
 		 */
-		public function getSound(type:String, forceNew:Boolean = false):SoundInstance {
-			if(type == null){ 
-				return null; 
+		public function getSound(type:String, forceNew:Boolean = false):SoundInstance
+		{
+			if (type == null)
+			{
+				return null;
 			}
 			//Try and retrieve instance from this manager.
 			var si:SoundInstance = instancesByType[type];
-			if(!si){
+			if (!si)
+			{
 				//If instance was not found, check out parent manager;
-				if(!si && parent){ si = parent.getSound(type); }
+				if (!si && parent)
+				{
+					si = parent.getSound(type);
+				}
 				//Still not found, check the children.
-				if(!si && groups){
-					for(var i:int = groups.length; i--;){
+				if (!si && groups)
+				{
+					for (var i:int = groups.length; i--; )
+					{
 						si = groups[i].getSound(type);
-						if(si){ break; }
+						if (si)
+						{
+							break;
+						}
 					}
 				}
 				//If we've found it, add it to our local instance list:
-				if(si && instances.indexOf(si) == -1){
+				if (si && instances.indexOf(si) == -1)
+				{
 					addInstance(si);
 				}
 			}
-			if(!si){ throw(new Error("[SoundAS] Sound with type '"+type+"' does not appear to be loaded.")); }
-			if(forceNew){
-				si = si.clone();	
-			} 
+			if (!si)
+			{
+				throw(new Error("[SoundAS] Sound with type '" + type + "' does not appear to be loaded."));
+			}
+			if (forceNew)
+			{
+				si = si.clone();
+			}
 			return si;
 		}
 		
 		/**
 		 * Preload a sound from a URL or Local Path
 		 * @param url External file path to the sound instance.
-		 * @param type 
+		 * @param type
 		 * @param buffer
-		 * 
+		 *
 		 */
-		public function loadSound(url:String, type:String, buffer:int = 100):void {
+		public function loadSound(url:String, type:String, buffer:int = 100):void
+		{
 			//Check whether this Sound is already loaded
 			var si:SoundInstance = instancesByType[type];
-			if(si && si.url == url){ return; }
+			if (si && si.url == url)
+			{
+				return;
+			}
 			
 			si = new SoundInstance(null, type);
 			si.url = url; //Useful for looking in case of load error
@@ -276,15 +339,18 @@ package treefortress.sound
 		/**
 		 * Inject a sound that has already been loaded.
 		 */
-		public function addSound(type:String, sound:Sound):void {
+		public function addSound(type:String, sound:Sound):void
+		{
 			var si:SoundInstance;
 			//If the type is already mapped, inject sound into the existing SoundInstance.
-			if(instancesByType[type]){
+			if (instancesByType[type])
+			{
 				si = instancesByType[type];
 				si.sound = sound;
-			} 
-				//Create a new SoundInstance
-			else {
+			}
+			//Create a new SoundInstance
+			else
+			{
 				si = new SoundInstance(sound, type);
 			}
 			addInstance(si);
@@ -293,10 +359,16 @@ package treefortress.sound
 		/**
 		 * Remove a sound from memory.
 		 */
-		public function removeSound(type:String):void {
-			if(instancesByType[type] == null){ return; }
-			for(var i:int = instances.length; i--;){
-				if(instances[i].type == type){
+		public function removeSound(type:String):void
+		{
+			if (instancesByType[type] == null)
+			{
+				return;
+			}
+			for (var i:int = instances.length; i--; )
+			{
+				if (instances[i].type == type)
+				{
 					instancesBySound[instances[i].sound] = null;
 					instances[i].destroy();
 					instances.splice(i, 1);
@@ -308,12 +380,18 @@ package treefortress.sound
 		/**
 		 * Unload all Sound instances.
 		 */
-		public function removeAll():void {
-			for(var i:int = instances.length; i--;){
+		public function removeAll():void
+		{
+			for (var i:int = instances.length; i--; )
+			{
 				instances[i].destroy();
 			}
-			if(groups){
-				for(i = groups.length; i--;){ groups[i].removeAll(); }
+			if (groups)
+			{
+				for (i = groups.length; i--; )
+				{
+					groups[i].removeAll();
+				}
 				groups.length = 0;
 			}
 			init();
@@ -322,10 +400,16 @@ package treefortress.sound
 		/**
 		 * Set master volume, which will me multiplied on top of all existing volume levels.
 		 */
-		public function get masterVolume():Number { return _masterVolume; }
-		public function set masterVolume(value:Number):void {
+		public function get masterVolume():Number
+		{
+			return _masterVolume;
+		}
+		
+		public function set masterVolume(value:Number):void
+		{
 			_masterVolume = value;
-			for(var i:int = instances.length; i--;){
+			for (var i:int = instances.length; i--; )
+			{
 				instances[i].masterVolume = _masterVolume;
 			}
 		}
@@ -333,12 +417,17 @@ package treefortress.sound
 		/**
 		 * Return a specific group , create one if it doesn't exist.
 		 */
-		public function group(name:String):SoundManager {
-			if(!groupsByName[name]){ 
-				groupsByName[name] = new SoundManager(); 
+		public function group(name:String):SoundManager
+		{
+			if (!groupsByName[name])
+			{
+				groupsByName[name] = new SoundManager();
 				(groupsByName[name] as SoundManager).parent = this;
 				
-				if(!groups){ groups = new <SoundManager>[]; }
+				if (!groups)
+				{
+					groups = new <SoundManager>[];
+				}
 				groups.push(groupsByName[name]);
 				
 			}
@@ -348,10 +437,17 @@ package treefortress.sound
 		/**
 		 * PRIVATE
 		 */
-		protected function init():void {
+		protected function init():void
+		{
 			//Create external signals
-			if(!loadCompleted){ loadCompleted = new Signal(SoundInstance); }
-			if(!loadFailed){ loadFailed = new Signal(SoundInstance); }
+			if (!loadCompleted)
+			{
+				loadCompleted = new Signal(SoundInstance);
+			}
+			if (!loadFailed)
+			{
+				loadFailed = new Signal(SoundInstance);
+			}
 			
 			//Init collections
 			_volume = 1;
@@ -364,24 +460,36 @@ package treefortress.sound
 			activeTweens = new Vector.<SoundTween>();
 		}
 		
-		internal function addMasterTween(startVolume:Number, endVolume:Number, duration:Number, stopAtZero:Boolean):void {
-			if(!_masterTween){ _masterTween = new SoundTween(null, 0, 0, true); }
+		internal function addMasterTween(startVolume:Number, endVolume:Number, duration:Number, stopAtZero:Boolean):void
+		{
+			if (!_masterTween)
+			{
+				_masterTween = new SoundTween(null, 0, 0, true);
+			}
 			_masterTween.init(startVolume, endVolume, duration);
 			_masterTween.stopAtZero = stopAtZero;
 			_masterTween.update(0);
 			//Only add masterTween if it isn't already active.
-			if(activeTweens.indexOf(_masterTween) == -1){
+			if (activeTweens.indexOf(_masterTween) == -1)
+			{
 				activeTweens.push(_masterTween);
 			}
 			tickEnabled = true;
 		}
 		
-		internal function addTween(type:String, startVolume:Number, endVolume:Number, duration:Number, stopAtZero:Boolean):SoundTween {
+		internal function addTween(type:String, startVolume:Number, endVolume:Number, duration:Number, stopAtZero:Boolean):SoundTween
+		{
 			var si:SoundInstance = getSound(type);
-			if(startVolume >= 0){ si.volume = startVolume; }
+			if (startVolume >= 0)
+			{
+				si.volume = startVolume;
+			}
 			
 			//Kill any active fade, it will get removed the next time the tweens are updated.
-			if(si.fade){ si.fade.kill(); }
+			if (si.fade)
+			{
+				si.fade.kill();
+			}
 			
 			var tween:SoundTween = new SoundTween(si, endVolume, duration);
 			tween.stopAtZero = stopAtZero;
@@ -394,10 +502,13 @@ package treefortress.sound
 			return tween;
 		}
 		
-		protected function onTick(event:Event):void {
+		protected function onTick(event:Event):void
+		{
 			var t:int = getTimer();
-			for(var i:int = activeTweens.length; i--;){
-				if(activeTweens[i].update(t)){
+			for (var i:int = activeTweens.length; i--; )
+			{
+				if (activeTweens[i].update(t))
+				{
 					activeTweens[i].end();
 					activeTweens.splice(i, 1);
 				}
@@ -405,39 +516,106 @@ package treefortress.sound
 			tickEnabled = (activeTweens.length > 0);
 		}
 		
-		protected function addInstance(si:SoundInstance):void {
+		protected function addInstance(si:SoundInstance):void
+		{
 			si.mute = _mute;
 			si.manager = this;
-			if(instances.indexOf(si) == -1){ instances.push(si); }
+			if (instances.indexOf(si) == -1)
+			{
+				instances.push(si);
+			}
 			instancesBySound[si.sound] = si;
 			instancesByType[si.type] = si;
 		}
 		
-		protected function onSoundLoadComplete(event:Event):void {
+		protected function onSoundLoadComplete(event:Event):void
+		{
 			var sound:Sound = event.target as Sound;
-			loadCompleted.dispatch(instancesBySound[sound]);	
+			loadCompleted.dispatch(instancesBySound[sound]);
 		}
 		
-		protected function onSoundLoadProgress(event:ProgressEvent):void { }
+		protected function onSoundLoadProgress(event:ProgressEvent):void
+		{
+		}
 		
-		protected function onSoundLoadError(event:IOErrorEvent):void {
+		protected function onSoundLoadError(event:IOErrorEvent):void
+		{
 			var sound:SoundInstance = instancesBySound[event.target as Sound];
 			loadFailed.dispatch(sound);
-			trace("[SoundAS] ERROR: Failed Loading Sound '"+sound.type+"' @ "+sound.url);
+			trace("[SoundAS] ERROR: Failed Loading Sound '" + sound.type + "' @ " + sound.url);
 		}
 		
-		protected function get tickEnabled():Boolean { return _tickEnabled; }
-		protected function set tickEnabled(value:Boolean):void {
-			if(value == _tickEnabled){ return; }
+		protected function get tickEnabled():Boolean
+		{
+			return _tickEnabled;
+		}
+		
+		protected function set tickEnabled(value:Boolean):void
+		{
+			if (value == _tickEnabled)
+			{
+				return;
+			}
 			_tickEnabled = value;
-			if(_tickEnabled){
-				if(!ticker){ ticker = new Sprite(); }
+			if (_tickEnabled)
+			{
+				if (!ticker)
+				{
+					ticker = new Sprite();
+				}
 				ticker.addEventListener(Event.ENTER_FRAME, onTick);
-			} else {
-				ticker.removeEventListener(Event.ENTER_FRAME, onTick); 
+			}
+			else
+			{
+				ticker.removeEventListener(Event.ENTER_FRAME, onTick);
 			}
 		}
+		//_______________________________________________________________________________________________________________//
+		//by @espigah
+		//_______________________________________________________________________________________________________________//
+		public function addEmbededSound($soundClass:Class, $type:String, $buffer:int = 100):void
+		{
+			addSound($type, new $soundClass() as Sound);
+		}
+		
+		public function loadQueue($soundQueue:SoundQueue):void
+		{
+			var si:SoundInstance;
+			$soundQueue.iterator(onIterator);
+			var countLoader:int = 0;
+			function onIterator($index:int, $iten:Object):void
+			{
+				//load copy/past =P //Todo - create function to load end loadQueue
+				si = instancesByType[$iten.type];
+				if (si && si.url == $iten.url)
+				{
+					return;
+				}
+				
+				si = new SoundInstance(null, $iten.type);
+				si.url = $iten.url; //Useful for looking in case of load error
+				si.sound = new Sound(new URLRequest($iten.url), new SoundLoaderContext($iten.buffer, false));
+				si.sound.addEventListener(IOErrorEvent.IO_ERROR, localSoundLoadError, false, 0, true);
+				//si.sound.addEventListener(ProgressEvent.PROGRESS, onSoundLoadProgress, false, 0, true);
+				si.sound.addEventListener(Event.COMPLETE, localSoundLoadComplete, false, 0, true);
+				addInstance(si);
+			}
+			
+			function localSoundLoadError(e:Event):void
+			{
+				countLoader++;
+				//Todo 
+			}
+			function localSoundLoadComplete(e:Event):void
+			{
+				countLoader++;
+				if (countLoader >= $soundQueue.queue.length)
+				{
+					loadCompleted.dispatch(instancesBySound[e.target as Sound]);
+				}
+			}	
+		}
+	
 	}
 }
-
 
